@@ -80,7 +80,7 @@ SELECT
     Monthly_Revenue,
     Monthly_Revenue - LAG(Monthly_Revenue) OVER (PARTITION BY year ORDER BY month) AS Monthly_Difference,
     Revenue_YTD,
-    ROUND((Monthly_Revenue - LAG(Monthly_Revenue) OVER (PARTITION BY year ORDER BY month)) / LAG(Monthly_Revenue) OVER (PARTITION BY year ORDER BY month) * 100, 2) AS Monthly_Change_Percentage
+    (Monthly_Revenue - LAG(Monthly_Revenue) OVER (PARTITION BY year ORDER BY month)) / LAG(Monthly_Revenue) OVER (PARTITION BY year ORDER BY month) * 100 AS Monthly_Change_Percentage
 FROM 
     CumulativeRevenue
 ORDER BY
@@ -247,7 +247,7 @@ After the analysis, I used Docker to store the database, ensuring a portable, co
     Creating db      ... done
     ```
        
-2. **Conectar o PgAdmin** Access PgAdmin via the URL: [http://localhost:5050](http://localhost:5050), with the password `natan`. 
+2. **Conectar o PgAdmin** Access PgAdmin via the URL: [http://locpostgrealhost:5050](http://localhost:5050), with the password `natan`. 
 
 Set up a new server in PgAdmin:
 

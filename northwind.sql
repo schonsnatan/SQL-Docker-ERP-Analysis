@@ -3951,7 +3951,7 @@ SELECT
     Monthly_Revenue,
     Monthly_Revenue - LAG(Monthly_Revenue) OVER (PARTITION BY year ORDER BY month) AS Monthly_Difference,
     Revenue_YTD,
-    ROUND((Monthly_Revenue - LAG(Monthly_Revenue) OVER (PARTITION BY year ORDER BY month)) / LAG(Monthly_Revenue) OVER (PARTITION BY year ORDER BY month) * 100, 2) AS Monthly_Change_Percentage
+    (Monthly_Revenue - LAG(Monthly_Revenue) OVER (PARTITION BY year ORDER BY month)) / LAG(Monthly_Revenue) OVER (PARTITION BY year ORDER BY month) * 100 AS Monthly_Change_Percentage
 FROM 
     CumulativeRevenue
 ORDER BY
