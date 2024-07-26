@@ -231,7 +231,7 @@ After the analysis, I used Docker to store the database, ensuring a portable, co
 
 ### Steps to Docker configuration:
 
-1. **Initialize Docker Compose** Run the command below to upload the services:
+1. **Initialize Docker Compose** Run the command below using git bash inside the folder to upload the services:
     
     ```
     docker-compose up
@@ -247,7 +247,7 @@ After the analysis, I used Docker to store the database, ensuring a portable, co
     Creating db      ... done
     ```
        
-2. **Conectar o PgAdmin** Access PgAdmin via the URL: [http://locpostgrealhost:5050](http://localhost:5050), with the password `natan`. 
+2. **Conectar o PgAdmin** Access PgAdmin via the URL: [http://locpostgrealhost:5050](http://localhost:5050), with the password `postgres`. 
 
 Set up a new server in PgAdmin:
 
