@@ -215,4 +215,58 @@ HAVING
 
 After the analysis, I used Docker to store the database, ensuring a portable, consistent, and isolated environment that can be easily shared and scaled. Docker enhances the development process by allowing seamless replication of the database setup across different systems.
 
-# Configuration
+## Configuration
+
+### Manually
+
+* Install and configure PostgreSQL and pgadmin
+* Import the provided `nortwhind.sql` file to populate your database
+
+### With Docker and Docker Compose
+
+* You need to install Docker and Docker Compose
+
+* [Start with Docker](https://www.docker.com/get-started)
+* [Install Docker Compose](https://docs.docker.com/compose/install/) 
+
+### Steps to Docker configuration:
+
+1. **Initialize Docker Compose** Run the command below to upload the services:
+    
+    ```
+    docker-compose up
+    ```
+    
+    Wait for the configuration messages, such as:
+    
+    ```csharp
+    Creating network "northwind_psql_db" with driver "bridge"
+    Creating volume "northwind_psql_db" with default driver
+    Creating volume "northwind_psql_pgadmin" with default driver
+    Creating pgadmin ... done
+    Creating db      ... done
+    ```
+       
+2. **Conectar o PgAdmin** Access PgAdmin via the URL: [http://localhost:5050](http://localhost:5050), with the password `natan`. 
+
+Set up a new server in PgAdmin:
+
+    * **General tab**:
+        * Name: db
+    * **Connection tab**:
+        * Host name: db
+        * Username: postgres
+        * Password: natan 
+    Then select the “northwind” database".
+
+3. **Stopping Docker Compose** Stop the started server by the command `docker-compose up` using Ctrl-C and remove the containers with:
+    
+    ```
+    docker-compose down
+    ```
+    
+4. **Files and Persistence** Your changes to the Postgres databases will be persisted on the Docker volume `postgresql_data` and can be recovered by restarting Docker Compose with `docker-compose up`. To delete the data from the database, run:
+    
+    ```
+    docker-compose down -v
+    ```

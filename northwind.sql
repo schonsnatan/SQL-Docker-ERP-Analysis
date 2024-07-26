@@ -3910,119 +3910,134 @@ ALTER TABLE ONLY employees
 -- PostgreSQL database dump complete
 --
 
-CREATE VIEW total_revenues_1997_view AS
-SELECT SUM((order_details.unit_price) * order_details.quantity * (1.0 - order_details.discount)) AS total_revenues_1997
-FROM order_details
-INNER JOIN (
-    SELECT order_id 
-    FROM orders 
-    WHERE EXTRACT(YEAR FROM order_date) = '1997'
-) AS ord 
-ON ord.order_id = order_details.order_id;
+CREATE VIEW total_revenue_1997 AS
+SELECT 
+    SUM(od.unit_price * od.quantity * (1 - discount)) AS total_revenue_1997 
+FROM 
+    orders AS o 
+JOIN 
+    order_details AS od 
+ON 
+    o.order_id = od.order_id
+WHERE 
+    EXTRACT(YEAR FROM o.order_date) = 1997;
 
-CREATE VIEW view_receitas_acumuladas AS
-WITH ReceitasMensais AS (
+CREATE VIEW cumulative_revenue AS
+WITH MonthlyRevenue AS (
+    SELECT 
+        EXTRACT(YEAR FROM order_date) AS year,
+        EXTRACT(MONTH FROM order_date) AS month,
+        SUM(od.unit_price * od.quantity * (1 - od.discount)) AS Monthly_Revenue
+    FROM 
+        orders AS o 
+    INNER JOIN 
+        order_details AS od ON o.order_id = od.order_id 
+    GROUP BY 
+        year,
+        month
+),
+CumulativeRevenue AS (
     SELECT
-        EXTRACT(YEAR FROM orders.order_date) AS Ano,
-        EXTRACT(MONTH FROM orders.order_date) AS Mes,
-        SUM(order_details.unit_price * order_details.quantity * (1.0 - order_details.discount)) AS Receita_Mensal
-    FROM
-        orders
-    INNER JOIN
+        year,
+        month,
+        Monthly_Revenue,
+        SUM(Monthly_Revenue) OVER (PARTITION BY year ORDER BY month) AS Revenue_YTD
+    FROM 
+        MonthlyRevenue
+)
+SELECT 
+    year,
+    month,
+    Monthly_Revenue,
+    Monthly_Revenue - LAG(Monthly_Revenue) OVER (PARTITION BY year ORDER BY month) AS Monthly_Difference,
+    Revenue_YTD,
+    ROUND((Monthly_Revenue - LAG(Monthly_Revenue) OVER (PARTITION BY year ORDER BY month)) / LAG(Monthly_Revenue) OVER (PARTITION BY year ORDER BY month) * 100, 2) AS Monthly_Change_Percentage
+FROM 
+    CumulativeRevenue
+ORDER BY
+    year, month;
+
+CREATE VIEW total_revenue_per_customer AS
+SELECT 
+    DISTINCT company_name,
+    SUM(unit_price * quantity * (1 - discount)) OVER (PARTITION BY company_name) AS total_spent 
+FROM 
+    customers
+JOIN 
+    orders ON orders.customer_id = customers.customer_id
+JOIN 
+    order_details ON orders.order_id = order_details.order_id
+ORDER BY 
+    total_spent DESC;
+
+
+CREATE VIEW total_revenue_per_customer_group AS 
+SELECT 
+    company_name,
+    SUM(unit_price * quantity * (1 - discount)) AS total_spend,
+    NTILE(5) OVER (ORDER BY SUM(unit_price * quantity * (1 - discount)) DESC) AS ranking
+FROM 
+    customers
+JOIN 
+    orders ON orders.customer_id = customers.customer_id
+JOIN 
+    order_details ON orders.order_id = order_details.order_id
+GROUP BY
+    company_name
+ORDER BY 
+    total_spend DESC;
+
+
+CREATE VIEW marketing_clients AS
+WITH marketing_clients AS (
+    SELECT 
+        company_name,
+        SUM(unit_price * quantity * (1 - discount)) AS total_spend,
+        NTILE(5) OVER (ORDER BY SUM(unit_price * quantity * (1 - discount)) DESC) AS ranking
+    FROM 
+        customers
+    JOIN 
+        orders ON orders.customer_id = customers.customer_id
+    JOIN 
         order_details ON orders.order_id = order_details.order_id
     GROUP BY
-        EXTRACT(YEAR FROM orders.order_date),
-        EXTRACT(MONTH FROM orders.order_date)
-),
-ReceitasAcumuladas AS (
-    SELECT
-        Ano,
-        Mes,
-        Receita_Mensal,
-        SUM(Receita_Mensal) OVER (PARTITION BY Ano ORDER BY Mes) AS Receita_YTD
-    FROM
-        ReceitasMensais
+        company_name
+    ORDER BY 
+        total_spend DESC
 )
-SELECT
-    Ano,
-    Mes,
-    Receita_Mensal,
-    Receita_Mensal - LAG(Receita_Mensal) OVER (PARTITION BY Ano ORDER BY Mes) AS Diferenca_Mensal,
-    Receita_YTD,
-    (Receita_Mensal - LAG(Receita_Mensal) OVER (PARTITION BY Ano ORDER BY Mes)) / LAG(Receita_Mensal) OVER (PARTITION BY Ano ORDER BY Mes) * 100 AS Percentual_Mudanca_Mensal
-FROM
-    ReceitasAcumuladas
-ORDER BY
-    Ano, Mes;
-
-CREATE VIEW view_total_revenues_per_customer AS
-SELECT 
-    customers.company_name, 
-    SUM(order_details.unit_price * order_details.quantity * (1.0 - order_details.discount)) AS total
-FROM 
-    customers
-INNER JOIN 
-    orders ON customers.customer_id = orders.customer_id
-INNER JOIN 
-    order_details ON order_details.order_id = orders.order_id
-GROUP BY 
-    customers.company_name
-ORDER BY 
-    total DESC;
-
-CREATE VIEW view_total_revenues_per_customer_group AS
-    SELECT 
-    customers.company_name, 
-    SUM(order_details.unit_price * order_details.quantity * (1.0 - order_details.discount)) AS total,
-    NTILE(5) OVER (ORDER BY SUM(order_details.unit_price * order_details.quantity * (1.0 - order_details.discount)) DESC) AS group_number
-FROM 
-    customers
-INNER JOIN 
-    orders ON customers.customer_id = orders.customer_id
-INNER JOIN 
-    order_details ON order_details.order_id = orders.order_id
-GROUP BY 
-    customers.company_name
-ORDER BY 
-    total DESC;
-
-CREATE VIEW clients_to_marketing AS
-WITH clientes_para_marketing AS (
-    SELECT 
-    customers.company_name, 
-    SUM(order_details.unit_price * order_details.quantity * (1.0 - order_details.discount)) AS total,
-    NTILE(5) OVER (ORDER BY SUM(order_details.unit_price * order_details.quantity * (1.0 - order_details.discount)) DESC) AS group_number
-FROM 
-    customers
-INNER JOIN 
-    orders ON customers.customer_id = orders.customer_id
-INNER JOIN 
-    order_details ON order_details.order_id = orders.order_id
-GROUP BY 
-    customers.company_name
-ORDER BY 
-    total DESC
-)
-
-SELECT *
-FROM clientes_para_marketing
-WHERE group_number >= 3;
+SELECT * FROM marketing_clients
+WHERE ranking >= 3;
 
 CREATE VIEW top_10_products AS
-SELECT products.product_name, SUM(order_details.unit_price * order_details.quantity * (1.0 - order_details.discount)) AS sales
-FROM products
-INNER JOIN order_details ON order_details.product_id = products.product_id
-GROUP BY products.product_name
-ORDER BY sales DESC;
+SELECT 
+    products.product_name,
+    SUM(order_details.quantity) AS total
+FROM 
+    products
+INNER JOIN
+    order_details ON order_details.product_id = products.product_id
+GROUP BY
+    products.product_name
+ORDER BY
+    total DESC
+LIMIT 10;
 
 CREATE VIEW uk_clients_who_pay_more_then_1000 AS
-SELECT customers.contact_name, SUM(order_details.unit_price * order_details.quantity * (1.0 - order_details.discount) * 100) / 100 AS payments
-FROM customers
-INNER JOIN orders ON orders.customer_id = customers.customer_id
-INNER JOIN order_details ON order_details.order_id = orders.order_id
-WHERE LOWER(customers.country) = 'uk'
-GROUP BY customers.contact_name
-HAVING SUM(order_details.unit_price * order_details.quantity * (1.0 - order_details.discount)) > 1000;
+SELECT 
+    customers.company_name,
+    SUM(order_details.unit_price * order_details.quantity * (1.0 - order_details.discount)) AS total_spend
+FROM 
+    customers
+INNER JOIN 
+    orders ON customers.customer_id = orders.customer_id
+INNER JOIN 
+    order_details ON orders.order_id = order_details.order_id
+WHERE 
+    UPPER(customers.country) = 'UK'
+GROUP BY
+    customers.company_name
+HAVING 
+    SUM(order_details.unit_price * order_details.quantity * (1.0 - order_details.discount)) > 1000;
 
 
 
