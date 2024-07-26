@@ -12,6 +12,8 @@ The Northwind database is a comprehensive dataset that mirrors the structure and
 
 It includes data related to orders, products, customers, and suppliers, providing a rich foundation for performing various business analyses.
 
+![Northwinf Database](northwind-er-diagram.png)
+
 ## The Importance of SQL Views for Future Analysis
 
 In this project, I have created multiple SQL views to streamline and enhance future analyses. SQL views are crucial because they:
