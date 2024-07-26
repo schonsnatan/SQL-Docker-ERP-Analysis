@@ -6,6 +6,25 @@ This repository contains several SQL views created to analyze data from the Nort
 
 This project showcases the power of SQL in performing advanced data analysis and deriving valuable business insights. By creating reusable SQL views, we can efficiently analyze revenue trends, customer spending patterns, and product performance.
 
+## Understanding the Northwind Database
+
+The Northwind database is a comprehensive dataset that mirrors the structure and functionality of an ERP system. 
+
+It includes data related to orders, products, customers, and suppliers, providing a rich foundation for performing various business analyses.
+
+## The Importance of SQL Views for Future Analysis
+
+In this project, I have created multiple SQL views to streamline and enhance future analyses. SQL views are crucial because they:
+
+* Provide a simplified interface for complex queries.
+* Improve query performance by pre-processing complex joins and aggregations.
+
+By utilizing SQL views, businesses can:
+
+* Analyze revenue trends and identify key drivers of growth.
+* Monitor customer spending patterns and optimize marketing strategies.
+* Generate actionable insights to drive data-driven decision-making.
+
 ## SQL Views
 
 ### 1. View: Total Revenue 1997
@@ -65,6 +84,27 @@ FROM
 ORDER BY
     year, month;
 ```
+#### KEY COMPONENTS
+
+Monthly Revenue Calculation:
+* Extracts the year and month from the order date.
+* Calculates the monthly revenue using:
+```sql
+SUM(od.unit_price * od.quantity * (1-od.discount)).
+```
+
+Cumulative Revenue Calculation:
+* Uses the SUM function as a window function to calculate the cumulative revenue (YTD) within each year, ordered by month.
+
+Final Output:
+* Displays the monthly revenue, monthly difference, YTD revenue, and the percentage change in monthly revenue.
+
+Importance:
+* Monthly Revenue: Helps in understanding the revenue generated each month.
+* YTD Revenue: Provides a running total of revenue throughout the year, giving insight into overall performance.
+* Monthly Change Percentage: Shows the growth or decline in revenue month-over-month, crucial for trend analysis.
+
+This analysis provides valuable insights into business performance and helps in making informed decisions.
 
 ### 3. View: Total Revenue per Customer
 Calculates the total revenue per customer.
