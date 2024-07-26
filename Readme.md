@@ -2,7 +2,7 @@
 
 This repository contains several SQL views created to analyze data from the Northwind database, which simulates a real-world ERP system. The analyses provide valuable insights into revenue, customer spending, and product performance. Below are the SQL views and their explanations.
 
-# Project Overview
+## Project Overview
 
 This project showcases the power of SQL in performing advanced data analysis and deriving valuable business insights. By creating reusable SQL views, we can efficiently analyze revenue trends, customer spending patterns, and product performance.
 
